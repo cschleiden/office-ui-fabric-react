@@ -306,7 +306,7 @@ export class List extends BaseComponent<IListProps, IListState> implements IList
       pageElements.push(this._renderPage(pages[i]));
     }
 
-    // console.log(`Page elements ${pageElements.length}`);
+    console.log(`Page elements ${pageElements.length}`);
 
     return (
       <div ref='root' { ...divProps } role={ role } className={ css('ms-List', className) } >

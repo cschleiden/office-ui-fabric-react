@@ -17,6 +17,7 @@ import {
 import { IDetailsRowProps } from '../DetailsList/DetailsRow';
 import { IDetailsHeaderProps } from './DetailsHeader';
 import { IViewport } from '../../utilities/decorators/withViewport';
+import { IListProps } from '../List/index';
 
 export { IDetailsHeaderProps };
 
@@ -61,6 +62,8 @@ export interface IDetailsListProps extends React.Props<DetailsList> {
 
   /** Controls how/if the details list manages selection. */
   selectionMode?: SelectionMode;
+
+  listProps?: IListProps;
 
   /**
    * By default, selection is cleared when clicking on an empty (non-focusable) section of the screen. Setting this value to true
