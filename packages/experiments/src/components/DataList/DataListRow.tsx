@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { css, autobind } from 'office-ui-fabric-react/lib/Utilities';
 import { IItem } from './List';
-import { IColumn, ISizing } from './DataList';
+import { IColumn } from './DataList.Props';
 
 import * as stylesImport from './DataListRow.scss';
 import { ISelection } from 'office-ui-fabric-react/lib/utilities/selection';
@@ -39,11 +39,11 @@ export class DataListRow<TItem extends IItem = any> extends React.PureComponent<
         className
       ) }
       data-selection-index={ index }>
-      { this.renderColumns() }
+      { this._renderColumns() }
     </div>;
   }
 
-  private renderColumns(): JSX.Element[] {
+  private _renderColumns(): JSX.Element[] {
     const { className, columns, item, itemHeight, dropColumns } = this.props;
 
     return columns.map(column => {
@@ -51,7 +51,6 @@ export class DataListRow<TItem extends IItem = any> extends React.PureComponent<
         key,
         fieldName,
         name,
-        sizing,
         minWidth,
         isCollapsable
       } = column;
@@ -68,18 +67,13 @@ export class DataListRow<TItem extends IItem = any> extends React.PureComponent<
           height: itemHeight
         } }>
         <div className={ styles.text }>
-          { this.getValueFromColumn(item, fieldName || key) }
+          { this._getValueFromColumn(item, fieldName || key) }
         </div>
       </div>;
     });
   }
 
-  private getValueFromColumn(item: TItem, key: string): string {
+  private _getValueFromColumn(item: TItem, key: string): string {
     return (item as any)[key];
-  }
-
-  @autobind
-  private onClick() {
-    this.props.selection!.toggleKeySelected(this.props.item.key);
   }
 }

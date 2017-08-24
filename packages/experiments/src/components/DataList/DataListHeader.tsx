@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { IItem } from './List';
-import { IColumn, ISizing } from './DataList';
+import { IColumn } from './DataList.Props';
 import { DataListRow } from './DataListRow';
 import * as stylesImport from './DataListHeader.scss';
 const styles: any = stylesImport;

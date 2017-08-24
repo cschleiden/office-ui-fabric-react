@@ -70,12 +70,12 @@ export class SelectionZone extends BaseComponent<ISelectionZoneProps, {}> {
   private _shouldHandleFocusTimeoutId: number | undefined;
 
   public componentDidMount() {
-    let win = getWindow(this.refs.root);
-    let scrollElement = findScrollableParent(this.refs.root);
-
     // Track the latest modifier keys globally.
+    const win = getWindow(this.refs.root);
     this._events.on(win, 'keydown keyup', this._updateModifiers);
-    this._events.on(scrollElement, 'click', this._tryClearOnEmptyClick);
+
+    // Track clicks only on the selection zone
+    this._events.on(this.refs.root, 'click', this._tryClearOnEmptyClick);
   }
 
   public render() {

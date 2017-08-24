@@ -1,55 +1,15 @@
 import * as React from 'react';
-import { BaseComponent, IBaseProps, css, IRenderFunction } from 'office-ui-fabric-react/lib/Utilities';
+import { BaseComponent, IBaseProps, css, IRenderFunction, autobind } from 'office-ui-fabric-react/lib/Utilities';
 import { ISelection, Selection, SelectionZone, SelectionMode } from 'office-ui-fabric-react/lib/utilities/selection';
 import { FocusZone, FocusZoneDirection } from 'office-ui-fabric-react/lib/FocusZone';
-import { IItem } from './List';
+import { IItem, IListProps } from './List';
 import { StaticList } from './StaticList';
-import { VirtualizedList, IVirtualizedListProps } from './VirtualizedList';
 import { DataListRow } from './DataListRow';
 import { DataListHeader } from './DataListHeader';
+import { IDataListProps, IDataListListProps } from 'src/components/DataList/DataList.Props';
+
 import * as stylesImport from './DataList.scss';
 const styles: any = stylesImport;
-
-export interface ISizing {
-  grow: number;
-
-  shrink: number;
-
-  basis: number | string;
-}
-
-export interface IColumn {
-  key: string;
-
-  name: string;
-
-  sizing?: ISizing;
-
-  fieldName: string | null;
-
-  minWidth: number;
-  maxWidth?: number;
-
-  /**
-   * Optional property that determines whether the column can be dropped if there is not enough room to satisfy all min-width
-   * requests. Only works for columns from right to left.
-   */
-  isCollapsable?: boolean;
-
-  isResizable?: boolean;
-}
-
-export interface IDataListProps<TItem extends IItem> extends IBaseProps {
-  items: TItem[];
-
-  columns: IColumn[];
-
-  isVirtualized?: boolean;
-
-  itemHeight: number;
-
-  dropColumns?: boolean;
-}
 
 export class DataList<TItem extends IItem = any> extends BaseComponent<IDataListProps<TItem>, {}> {
   private container: HTMLElement;
@@ -65,21 +25,24 @@ export class DataList<TItem extends IItem = any> extends BaseComponent<IDataList
   }
 
   public render(): JSX.Element {
-    const { items, isVirtualized, itemHeight, columns, dropColumns } = this.props;
+    const {
+      items,
+      itemHeight,
+      columns,
+      onRenderList = this._renderList
+     } = this.props;
 
-    /*onItemInvoked={ onItemInvoked }
-          onItemContextMenu={ onItemContextMenu }*/
+    return <div
+      className={ css(
+        'ms-DataList'
+      ) }
+      ref={ this._resolveRef('container') }>
 
-    return <div className={ css(
-      'ms-DataList',
-      styles.root,
-      dropColumns && styles.dropColumns
-    ) } ref={ this._resolveRef('container') }>
       <DataListHeader columns={ columns } itemHeight={ itemHeight } />
 
       <FocusZone
         ref={ this._resolveRef('_focusZone') }
-        className={ styles.focusZone }
+        className={ stylesImport.focusZone }
         direction={ FocusZoneDirection.vertical }
         isInnerZoneKeystroke={ () => false }
       >
@@ -90,23 +53,13 @@ export class DataList<TItem extends IItem = any> extends BaseComponent<IDataList
           selectionMode={ SelectionMode.single }
         >
 
-          {
-            isVirtualized ?
-              (
-                React.createElement(
-                  VirtualizedList,
-                  {
-                    items,
-                    itemHeight,
-                    onRenderItem: this.renderRow,
-                    itemOverdraw: 4,
-                    scrollContainer: () => this.container
-                  } as IVirtualizedListProps<TItem>
-                )
-              ) : (
-                <StaticList items={ items } onRenderItem={ this.renderRow } />
-              )
-          }
+          { onRenderList(
+            {
+              items,
+              itemHeight,
+              className: 'ms-DataListList',
+              onRenderItem: this._renderRow
+            }) }
 
         </SelectionZone>
       </FocusZone>
@@ -122,24 +75,29 @@ export class DataList<TItem extends IItem = any> extends BaseComponent<IDataList
     performance.mark('control-end');
     performance.measure('control', 'control-start', 'control-end');
 
-    console.log(`DataList rendering ${performance.now() - this.start}s`);
+    console.log(`DataList rendering ${performance.now() - this.start}ms`);
   }
 
-  private renderRow = (index: number, item: TItem): (JSX.Element | null) => {
+  @autobind
+  private _renderList(listProps: IDataListListProps<TItem>) {
+    return <StaticList
+      {...listProps}
+    />;
+  }
+
+  @autobind
+  private _renderRow(item: TItem, index: number): (JSX.Element | null) {
     const { itemHeight, columns } = this.props;
 
-    return <div key={ item.key }>
+    return React.createElement(
+      DataListRow as { new(): DataListRow<TItem> },
       {
-        React.createElement(
-          DataListRow as { new(): DataListRow<TItem> },
-          {
-            columns,
-            index,
-            item,
-            itemHeight,
-            selection: this.selection
-          })
-      }
-    </div>;
+        columns,
+        index,
+        item,
+        itemHeight,
+        selection: this.selection,
+        key: item.key
+      });
   }
 }

@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { } from 'react-addons-perf';
-import { DataList, IColumn } from '../DataList';
+import { DataList, IColumn } from '../index';
 import { IItem } from '../List';
+import { DetailsDataList } from '../DetailsDataList';
 
 interface IListItem extends IItem {
   name: string;
@@ -46,9 +47,8 @@ export class DataListBasicExample extends React.Component<any, any> {
       <div>
         {
           React.createElement(
-            DataList as any,
+            DetailsDataList as any,
             {
-              isVirtualized: true,
               items,
               itemHeight: 30,
               columns: [

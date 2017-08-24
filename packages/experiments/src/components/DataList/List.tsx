@@ -12,5 +12,7 @@ export interface IListProps<TItem extends IItem> {
 
   items: TItem[];
 
-  onRenderItem: (index: number, item: TItem) => JSX.Element | null;
+  itemHeight: number;
+
+  onRenderItem: (item: TItem, index: number) => JSX.Element | null;
 }

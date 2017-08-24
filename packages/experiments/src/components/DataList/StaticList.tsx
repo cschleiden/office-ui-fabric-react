@@ -16,7 +16,7 @@ export class StaticList<TItem extends IItem = any> extends React.PureComponent<I
      } = this.props;
 
     return <ListTag className={ css(className) }>
-      { items.map((item, index) => onRenderItem(index, item)) }
+      { items.map((item, index) => onRenderItem(item, index)) }
     </ListTag>;
   }
 }

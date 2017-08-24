@@ -34,24 +34,26 @@ export class VirtualizedList<TItem extends IItem = any> extends BaseComponent<IV
 
     this.state = {
       viewportHeight: initialViewportHeight,
-
       scrollTop: 0
     };
 
-    this.onScroll = this._async.debounce(this.onScroll, 100);
+    this._onScroll = this._async.debounce(this._onScroll, 100, {
+      leading: true // We want to execute one iteration immediately after we render
+    });
   }
 
   public componentDidMount() {
+    // TODO: CS: This forces layout, remove?
     this.scrollContainer = findScrollableParent(this.root)!;
+    if (!this.scrollContainer) {
+      throw new Error('Could not find scroll container');
+    }
 
-    // Start measurement timer, after delay measure actual surface
-    this._events.on(this.scrollContainer, 'scroll', this.onScroll);
+    this._events.on(this.scrollContainer, 'scroll', this._onScroll);
   }
 
   public componentWillUnmount() {
     this._events.off(this.scrollContainer, 'scroll');
-
-    // test
   }
 
   public render() {
@@ -61,11 +63,11 @@ export class VirtualizedList<TItem extends IItem = any> extends BaseComponent<IV
     return <div
       className={ css(styles.root/*, hasExternalScrollContainer && styles.rootOverflow*/, className) }
       ref={ this._resolveRef('root') }>
-      { this.renderItems() }
+      { this._renderItems() }
     </div>;
   }
 
-  private renderItems(): (JSX.Element | null)[] {
+  private _renderItems(): (JSX.Element | null)[] {
     const {
       itemHeight,
       items,
@@ -88,12 +90,14 @@ export class VirtualizedList<TItem extends IItem = any> extends BaseComponent<IV
         items.length)
     );
     for (let i = startIndex; i < endIndex; ++i) {
-      result.push(onRenderItem(i, items[i]));
+      result.push(onRenderItem(items[i], i));
     }
 
     // Generate spacer items
     const startSpacerHeight = startIndex * itemHeight;
-    result.unshift(<li key='spacer-item-start' style={ { height: startSpacerHeight } } />);
+    if (startSpacerHeight > 0) {
+      result.unshift(<li key='spacer-item-start' style={ { height: startSpacerHeight } } />);
+    }
 
     const endSpacerHeight = (items.length - endIndex) * itemHeight;
     if (endSpacerHeight > 0) {
@@ -103,9 +107,9 @@ export class VirtualizedList<TItem extends IItem = any> extends BaseComponent<IV
     return result;
   }
 
-  private onScroll() {
+  private _onScroll() {
     // TODO: CS: Can we use intersectionobserver here?
-    requestAnimationFrame(() => {
+    this._async.requestAnimationFrame(() => {
       let scrollTop = 0;
       if (this.scrollContainer as any === window) {
         scrollTop = (this.scrollContainer as any).scrollY;
