@@ -1,6 +1,4 @@
-/* tslint:disable:no-unused-variable */
 import * as React from 'react';
-/* tslint:enable:no-unused-variable */
 import * as ReactDOM from 'react-dom';
 import { App, AppDefinition } from './AppDefinition';
 import { IAppLink, IAppLinkGroup } from '@uifabric/example-app-base';
@@ -11,6 +9,8 @@ import { Fabric } from 'office-ui-fabric-react/lib/Fabric';
 
 import './index.scss';
 import './ColorStyles.scss';
+import { DataListBasicExample } from '../components/DataList/examples/DataList.Basic.Example';
+// import { DetailsListBasicExample } from '../components/VirtualizedList/examples/Example';
 
 setBaseUrl('./dist/');
 
@@ -37,9 +37,11 @@ function _onLoad(): void {
 
   ReactDOM.render(
     <Fabric>
-      <Router onNewRouteLoaded={ _scrollAnchorLink }>
+      { !true && <Router onNewRouteLoaded={ _scrollAnchorLink }>
         { _getRoutes() }
-      </Router>
+      </Router> }
+      {/*<DetailsListBasicExample />*/ }
+      <DataListBasicExample />
     </Fabric>,
     rootElement);
 }

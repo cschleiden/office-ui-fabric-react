@@ -1,0 +1,11 @@
+.root {
+  // overflow: auto;
+}
+
+.focusZone {
+  // Taken from DetailsList, evaluate if makes sense
+  display: inline-block;
+  vertical-align: top;
+  min-width: 100%;
+  min-height: 1px;
+}

@@ -30,6 +30,16 @@ export interface IDetailsList {
   forceUpdate: () => void;
 }
 
+/**
+ * Props required for rendering the inner list
+ */
+export interface IDetailsListListProps {
+  /** The items to render. */
+  items: any[];
+
+  onRenderCell?: (item?: any, index?: number) => React.ReactNode;
+}
+
 export interface IDetailsListProps extends React.Props<DetailsList>, IWithViewportProps {
   /**
    * Optional callback to access the IDetailsList interface. Use this instead of ref for accessing
@@ -120,6 +130,11 @@ export interface IDetailsListProps extends React.Props<DetailsList>, IWithViewpo
 
   /** Callback for when the context menu of an item has been accessed. */
   onItemContextMenu?: (item?: any, index?: number, ev?: Event) => void;
+
+  /**
+   * Optional, allows overriding the list rendering
+   */
+  onRenderList?: IRenderFunction<IDetailsListListProps>;
 
   /**
    *  If provided, will allow the caller to override the default row rendering.

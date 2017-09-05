@@ -20,6 +20,7 @@ import {
   IColumn,
   IDetailsList,
   IDetailsListProps,
+  IDetailsListListProps,
 } from '../DetailsList/DetailsList.Props';
 import { DetailsHeader, IDetailsHeader, SelectAllVisibility, IDetailsHeaderProps } from '../DetailsList/DetailsHeader';
 import { DetailsRow, IDetailsRowProps } from '../DetailsList/DetailsRow';
@@ -210,7 +211,9 @@ export class DetailsList extends BaseComponent<IDetailsListProps, IDetailsListSt
       getKey,
       listProps,
       usePageCache,
-      onShouldVirtualize
+      onShouldVirtualize,
+      onRenderDetailsHeader = this._onRenderDetailsHeader,
+      onRenderList = this._onRenderList
     } = this.props;
     let {
       adjustedColumns,
@@ -223,12 +226,7 @@ export class DetailsList extends BaseComponent<IDetailsListProps, IDetailsListSt
       _dragDropHelper: dragDropHelper
     } = this;
     let groupNestingDepth = this._getGroupNestingDepth();
-    const additionalListProps: IListProps = {
-      renderedWindowsAhead: isSizing ? 0 : DEFAULT_RENDERED_WINDOWS_AHEAD,
-      renderedWindowsBehind: isSizing ? 0 : DEFAULT_RENDERED_WINDOWS_BEHIND,
-      getKey,
-      ...listProps
-    };
+
     let selectAllVisibility = SelectAllVisibility.none; // for SelectionMode.none
     if (selectionMode === SelectionMode.single) {
       selectAllVisibility = SelectAllVisibility.hidden;
@@ -246,10 +244,6 @@ export class DetailsList extends BaseComponent<IDetailsListProps, IDetailsListSt
     if (checkboxVisibility === CheckboxVisibility.hidden) {
       selectAllVisibility = SelectAllVisibility.none;
     }
-
-    const {
-      onRenderDetailsHeader = this._onRenderDetailsHeader
-    } = this.props;
 
     return (
       // If shouldApplyApplicationRole is true, role application will be applied to make arrow keys work
@@ -311,34 +305,11 @@ export class DetailsList extends BaseComponent<IDetailsListProps, IDetailsListSt
                 onItemInvoked={ onItemInvoked }
                 onItemContextMenu={ onItemContextMenu }
               >
-                { groups ? (
-                  <GroupedList
-                    ref={ this._resolveRef('_groupedList') }
-                    groups={ groups }
-                    groupProps={ groupProps }
-                    items={ items }
-                    onRenderCell={ this._onRenderCell }
-                    selection={ selection }
-                    selectionMode={ selectionMode }
-                    dragDropEvents={ dragDropEvents }
-                    dragDropHelper={ dragDropHelper as DragDropHelper }
-                    eventsToRegister={ rowElementEventMap }
-                    listProps={ additionalListProps }
-                    onGroupExpandStateChanged={ this._onGroupExpandStateChanged }
-                    usePageCache={ usePageCache }
-                    onShouldVirtualize={ onShouldVirtualize }
-                  />
-                ) : (
-                    <List
-                      ref={ this._resolveRef('_list') }
-                      role='presentation'
-                      items={ items }
-                      onRenderCell={ (item, itemIndex) => this._onRenderCell(0, item, itemIndex as number) }
-                      usePageCache={ usePageCache }
-                      onShouldVirtualize={ onShouldVirtualize }
-                      { ...additionalListProps }
-                    />
-                  )
+                {
+                  onRenderList({
+                    items,
+                    onRenderCell: this._onRenderCell
+                  })
                 }
               </SelectionZone>
             </FocusZone>
@@ -354,8 +325,83 @@ export class DetailsList extends BaseComponent<IDetailsListProps, IDetailsListSt
   }
 
   @autobind
+  protected _onRenderList(props: IDetailsListListProps) {
+    const {
+      items,
+      onRenderCell
+    } = props;
+
+    const {
+      dragDropEvents,
+      getKey,
+      groups,
+      groupProps,
+      listProps,
+      onShouldVirtualize,
+      rowElementEventMap,
+      selectionMode,
+      usePageCache
+    } = this.props;
+    const {
+      isSizing,
+      isSomeGroupExpanded
+    } = this.state;
+    const {
+      _dragDropHelper: dragDropHelper,
+      _selection: selection
+    } = this;
+
+    const additionalListProps: IListProps = {
+      renderedWindowsAhead: isSizing ? 0 : DEFAULT_RENDERED_WINDOWS_AHEAD,
+      renderedWindowsBehind: isSizing ? 0 : DEFAULT_RENDERED_WINDOWS_BEHIND,
+      getKey,
+      usePageCache,
+      onShouldVirtualize,
+      onRenderCell,
+      ...listProps
+    };
+
+    if (groups) {
+      return <GroupedList
+        ref={ this._resolveRef('_groupedList') }
+        groups={ groups }
+        groupProps={ groupProps }
+        items={ items }
+        onRenderCell={ this._onRenderCell }
+        selection={ selection }
+        selectionMode={ selectionMode }
+        dragDropEvents={ dragDropEvents }
+        dragDropHelper={ dragDropHelper as DragDropHelper }
+        eventsToRegister={ rowElementEventMap }
+        listProps={ additionalListProps }
+        onGroupExpandStateChanged={ this._onGroupExpandStateChanged }
+      />;
+    } else {
+      return <List
+        ref={ this._resolveRef('_list') }
+        role='presentation'
+        items={ items }
+        onRenderCell={ onRenderCell }
+        { ...additionalListProps }
+      />;
+    }
+  }
+
+  @autobind
   protected _onRenderRow(props: IDetailsRowProps, defaultRender?: any) {
-    return <DetailsRow { ...props } />;
+    const { getKey } = this.props;
+    const { item, itemIndex } = props;
+
+    let rowKey = undefined;
+    if (item) {
+      rowKey = item.key;
+    }
+
+    if (getKey) {
+      rowKey = getKey(item, itemIndex);
+    }
+
+    return <DetailsRow key={ rowKey } { ...props } />;
   }
 
   @autobind
@@ -363,7 +409,7 @@ export class DetailsList extends BaseComponent<IDetailsListProps, IDetailsListSt
     return <DetailsHeader { ...detailsHeaderProps } />;
   }
 
-  private _onRenderCell(nestingDepth: number, item: any, index: number): React.ReactNode {
+  private _onRenderCell(item: any, index: number, nestingDepth: number = 0): React.ReactNode {
     let {
       compact,
       dragDropEvents,
@@ -576,10 +622,10 @@ export class DetailsList extends BaseComponent<IDetailsListProps, IDetailsListSt
   /** Builds a set of columns to fix within the viewport width. */
   private _getJustifiedColumns(newColumns: IColumn[], viewportWidth: number, props: IDetailsListProps) {
     let {
-      selectionMode,
+        selectionMode,
       checkboxVisibility,
       groups
-    } = props;
+      } = props;
     let outerPadding = DEFAULT_INNER_PADDING;
     let rowCheckWidth = (selectionMode !== SelectionMode.none && checkboxVisibility !== CheckboxVisibility.hidden) ? CHECKBOX_WIDTH : 0;
     let groupExpandWidth = groups ? GROUP_EXPAND_WIDTH : 0;
