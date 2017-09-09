@@ -1,9 +1,14 @@
 import * as React from 'react';
-import { SELECTION_CHANGE, css } from 'office-ui-fabric-react/lib';
-import { BaseComponent, autobind, IRenderFunction } from 'office-ui-fabric-react/lib/Utilities';
-import { ISelection, Selection, SelectionZone, SelectionMode } from 'office-ui-fabric-react/lib/utilities/selection';
-import { FocusZone, FocusZoneDirection } from 'office-ui-fabric-react/lib/FocusZone';
-import { StaticList } from '../StaticList';
+import { BaseComponent, autobind, IRenderFunction, css } from '../../Utilities';
+import {
+  ISelection,
+  Selection,
+  SelectionMode,
+  SelectionZone,
+  SELECTION_CHANGE
+} from '../../utilities/selection/index';
+import { FocusZone, FocusZoneDirection } from '../FocusZone/index';
+import { StaticList } from '../StaticList/index';
 import { DataListRowRenderer } from './DataListRow';
 import { DataListHeader } from './DataListHeader';
 import {

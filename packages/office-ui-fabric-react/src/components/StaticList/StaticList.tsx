@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { css } from 'office-ui-fabric-react/lib/Utilities';
-import { IObjectWithKey } from 'office-ui-fabric-react/lib/utilities/selection/index';
+import { css } from '../../Utilities';
+import { IObjectWithKey } from '../../utilities/selection/index';
 
-import { IList } from './List.Props';
+import { IGenericList } from './List.Props';
 import { IStaticListProps } from './StaticList.Props';
 
 import * as stylesImport from './StaticList.scss';
 
-export class StaticList<TItem extends IObjectWithKey> extends React.PureComponent<IStaticListProps<TItem>> implements IList<TItem> {
+export class StaticList<TItem extends IObjectWithKey> extends React.PureComponent<IStaticListProps<TItem>> implements IGenericList<TItem> {
   public render(): JSX.Element {
     const {
       className,

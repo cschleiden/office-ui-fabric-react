@@ -1,12 +1,14 @@
 import * as React from 'react';
 
-import { IObjectWithKey, css } from 'office-ui-fabric-react/lib';
-import { IColumn, IDataListColumnRowProps } from '../DataList.Props';
+import { IDataListColumn, IDataListColumnRowProps, IDataListItem } from '../DataList.Props';
 import { dataListCheck } from './DataListCheck';
+import {
+  css
+} from '../../../Utilities';
 
-import * as rowStyles from '../../../../../office-ui-fabric-react/src/components/DetailsList/DetailsRow.scss';
+import * as rowStyles from '../../DetailsList/DetailsRow.scss';
 
-export class DataListCheckColumn<TItem extends IObjectWithKey> implements IColumn<TItem> {
+export class DataListCheckColumn<TItem extends IDataListItem> implements IDataListColumn<TItem> {
   public readonly key: string = 'ms-DataList-CheckColumn';
   public readonly name: string = '';
   public readonly fieldName: string = '__dataListCheck';

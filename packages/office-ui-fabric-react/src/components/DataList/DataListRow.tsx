@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { mergeStyles, IRenderFunction } from 'office-ui-fabric-react/lib';
-import { IColumn, IDataListRowRenderer, IDataListRowProps, IDataListColumnRowProps, IDataListItem } from './DataList.Props';
+import { IDataListColumn, IDataListRowRenderer, IDataListRowProps, IDataListColumnRowProps, IDataListItem } from './DataList.Props';
+import { mergeStyles } from '../../Styling';
+import { IRenderFunction } from '../../Utilities';
 
 import * as stylesImport from './DataListRow.scss';
 
@@ -28,6 +29,7 @@ export class DataListRowRenderer<TItem extends IDataListItem> implements IDataLi
           }
         ) as string }
         data-selection-index={ index }
+        data-is-focusable={ true }
         role='row'
       >
         { this._renderColumns(props) }
@@ -38,7 +40,7 @@ export class DataListRowRenderer<TItem extends IDataListItem> implements IDataLi
   private _renderColumns(props: IDataListRowProps<TItem>): (JSX.Element | null)[] {
     const { columns } = props;
 
-    return columns.map((column: IColumn<TItem>, columnIndex: number) => {
+    return columns.map((column: IDataListColumn<TItem>, columnIndex: number) => {
       const {
         onRenderColumn = this._renderColumn
        } = column;
@@ -64,7 +66,8 @@ export class DataListRowRenderer<TItem extends IDataListItem> implements IDataLi
       isCollapsible,
       fieldName,
       minWidth,
-      maxWidth
+      maxWidth,
+      onRenderColumnContent = this._renderColumnContent
     } = column;
 
     const {
@@ -88,9 +91,30 @@ export class DataListRowRenderer<TItem extends IDataListItem> implements IDataLi
           ) as string
         }
       >
-        <div className={ stylesImport.text }>
-          { this._getValueFromColumn(item, fieldName || key) }
-        </div>
+        { onRenderColumnContent(props, this._renderColumnContent) }
+      </div>
+    );
+  }
+
+  private _renderColumnContent: IRenderFunction<IDataListColumnRowProps<TItem>>
+  = (props: IDataListColumnRowProps<TItem>): JSX.Element => {
+    const {
+      column,
+      row
+    } = props;
+
+    const {
+      fieldName,
+      key
+    } = column;
+
+    const {
+      item
+    } = row;
+
+    return (
+      <div className={ stylesImport.text }>
+        { this._getValueFromColumn(item, fieldName || key) }
       </div>
     );
   }

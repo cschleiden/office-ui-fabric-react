@@ -83,6 +83,12 @@ export const AppDefinition: IAppDefinition = {
           url: '#/examples/detailslist'
         },
         {
+          component: require<any>('../components/DataList/DataListPage').DataListPage,
+          key: 'DataList',
+          name: 'DataList',
+          url: '#/examples/datalist'
+        },
+        {
           component: require<any>('../components/Dialog/DialogPage').DialogPage,
           key: 'Dialog',
           name: 'Dialog',

@@ -1,7 +1,11 @@
 import * as React from 'react';
-import { mergeStyles, SelectionMode } from 'office-ui-fabric-react/lib';
 import { IDataListRowRenderer, IDataListHeaderProps, IDataListItem } from './DataList.Props';
 import { DataListRowRenderer } from './DataListRow';
+import {
+  ISelection,
+  SelectionMode
+} from '../../utilities/selection/index';
+import { mergeStyles } from '../../Styling';
 
 export class DataListHeader<TItem extends IDataListItem> extends React.PureComponent<IDataListHeaderProps<TItem>> {
   private _headerItem: { [columnName: string]: string };

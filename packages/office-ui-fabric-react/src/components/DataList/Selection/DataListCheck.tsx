@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { css } from 'office-ui-fabric-react/lib/Utilities';
-import { Check } from 'office-ui-fabric-react/lib/Check';
+import { css } from '../../../Utilities';
+import { Check } from '../../Check/index';
 
 import * as styles from './DataListCheck.scss';
 

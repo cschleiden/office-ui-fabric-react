@@ -9,7 +9,7 @@ import { Fabric } from 'office-ui-fabric-react/lib/Fabric';
 
 import './index.scss';
 import './ColorStyles.scss';
-import { DataListBasicExample } from '../components/DataList/examples/DataList.Basic.Example';
+// import { DataListBasicExample } from '../components/DataList/examples/DataList.Basic.Example';
 // import { DetailsListBasicExample } from '../components/VirtualizedList/examples/Example';
 
 setBaseUrl('./dist/');
@@ -41,7 +41,7 @@ function _onLoad(): void {
         { _getRoutes() }
       </Router> }
       {/*<DetailsListBasicExample />*/ }
-      <DataListBasicExample />
+      {/*<DataListBasicExample />*/ }
     </Fabric>,
     rootElement);
 }

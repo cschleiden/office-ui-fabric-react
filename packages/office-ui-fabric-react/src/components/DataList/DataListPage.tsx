@@ -7,7 +7,7 @@ import {
 } from '@uifabric/example-app-base';
 import { DataListBasicExample } from './examples/DataList.Basic.Example';
 
-let DataListBasicExampleCode = require('!raw-loader!experiments/src/components/DataList/examples/DataList.Basic.Example.tsx') as string;
+let DataListBasicExampleCode = require('!raw-loader!office-ui-fabric-react/src/components/DataList/examples/DataList.Basic.Example.tsx') as string;
 
 export class DataListPage extends React.Component<IComponentDemoPageProps, {}> {
   public render(): JSX.Element {

@@ -1,22 +1,23 @@
 import * as React from 'react';
-import { css } from 'office-ui-fabric-react/lib';
-import { autobind } from 'office-ui-fabric-react/lib/Utilities';
-import { IObjectWithKey, SelectionMode } from 'office-ui-fabric-react/lib/utilities/selection/index';
+import {
+  SelectionMode
+} from '../../utilities/selection/index';
+import { autobind, css } from '../../Utilities';
 import { IDetailsDataListProps } from './DetailsDataList.Props';
-import { IDataListListProps, IDataListHeaderProps, IDataListRowProps } from './DataList.Props';
+import { IDataListListProps, IDataListHeaderProps, IDataListRowProps, IDataListItem } from './DataList.Props';
 import { DataList } from './DataList';
-import { IVirtualizedListProps, VirtualizedList } from '../VirtualizedList';
+import { IVirtualizedListProps, VirtualizedList } from '../VirtualizedList/index';
 import { FlexColumnLayoutProvider } from './Layouts/FlexColumnLayout';
 import { DataListCheckColumn } from './Selection/DataListCheckColumn';
 
 import * as stylesImport from './DetailsDataList.scss';
-import * as headerStyles from '../../../../office-ui-fabric-react/src/components/DetailsList/DetailsHeader.scss';
-import * as rowStyles from '../../../../office-ui-fabric-react/src/components/DetailsList/DetailsRow.scss';
+import * as headerStyles from '../DetailsList/DetailsHeader.scss';
+import * as rowStyles from '../DetailsList/DetailsRow.scss';
 
 /**
  * Variant of `DataList`, configured to behave as closely as possible to DetailsList
  */
-export class DetailsDataList<TItem extends IObjectWithKey> extends React.Component<IDetailsDataListProps<TItem>> {
+export class DetailsDataList<TItem extends IDataListItem> extends React.Component<IDetailsDataListProps<TItem>> {
   private _columnLayoutProvider: FlexColumnLayoutProvider<TItem>;
 
   // tslint:disable-next-line:no-any
@@ -60,14 +61,12 @@ export class DetailsDataList<TItem extends IObjectWithKey> extends React.Compone
 
   @autobind
   private _renderList(listProps: IDataListListProps<TItem>): JSX.Element {
-    const { rowHeight } = this.props;
     const { onRenderItem, ...rest } = listProps;
 
     return React.createElement(
       VirtualizedList,
       {
         ...rest,
-        itemHeight: rowHeight,
         onRenderItem,
         itemOverdraw: 4,
         initialViewportHeight: 800,

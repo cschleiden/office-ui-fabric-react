@@ -1,8 +1,8 @@
-import { IBaseProps } from 'office-ui-fabric-react/lib/Utilities';
-import { IObjectWithKey } from 'office-ui-fabric-react/lib/utilities/selection/index';
-import { IListProps } from '../StaticList/List.Props';
+import { IBaseProps } from '../..//Utilities';
+import { IObjectWithKey } from '../../utilities/selection/index';
+import { IGenericListProps } from '../StaticList/List.Props';
 
-export interface IVirtualizedListProps<TItem extends IObjectWithKey> extends IListProps<TItem>, IBaseProps {
+export interface IVirtualizedListProps<TItem extends IObjectWithKey> extends IGenericListProps<TItem>, IBaseProps {
   /** Initial height of the viewport in pixels */
   initialViewportHeight?: number;
 

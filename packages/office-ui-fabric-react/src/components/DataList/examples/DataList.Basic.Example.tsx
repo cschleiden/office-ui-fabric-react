@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { IObjectWithKey, SelectionMode } from 'office-ui-fabric-react/lib/utilities/selection/index';
-import { IColumn } from '../index';
+import { IDataListColumn } from '../index';
 import { DetailsDataList } from '../DetailsDataList';
 
 interface IListItem extends IObjectWithKey {
@@ -93,7 +93,7 @@ export class DataListBasicExample extends React.Component {
                   isCollapsible: true,
                   isResizable: true
                 },
-              ] as IColumn<IListItem>[]
+              ] as IDataListColumn<IListItem>[]
             })
         }
       </div>

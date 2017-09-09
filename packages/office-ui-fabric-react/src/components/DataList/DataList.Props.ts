@@ -1,10 +1,14 @@
-import { IBaseProps, IRenderFunction } from 'office-ui-fabric-react/lib/Utilities';
-import { IObjectWithKey, ISelection, SelectionMode } from 'office-ui-fabric-react/lib/utilities/selection';
-import { IListProps } from '../StaticList/List.Props';
+import { IBaseProps, IRenderFunction } from '../../Utilities';
+import {
+  IObjectWithKey,
+  ISelection,
+  SelectionMode
+} from '../../utilities/selection/index';
+import { IGenericListProps } from '../StaticList/index';
 
 export type IDataListItem = IObjectWithKey;
 
-export interface IColumn<TItem extends IDataListItem> {
+export interface IDataListColumn<TItem extends IDataListItem> {
   key: string;
 
   name: string;
@@ -23,12 +27,14 @@ export interface IColumn<TItem extends IDataListItem> {
   isResizable?: boolean;
 
   onRenderColumn?: IRenderFunction<IDataListColumnRowProps<TItem>>;
+
+  onRenderColumnContent?: IRenderFunction<IDataListColumnRowProps<TItem>>;
 }
 
 export interface IDataListColumnRowProps<TItem extends IDataListItem> {
   row: IDataListRowProps<TItem>;
 
-  column: IColumn<TItem>;
+  column: IDataListColumn<TItem>;
 
   columnIndex: number;
 }
@@ -36,13 +42,13 @@ export interface IDataListColumnRowProps<TItem extends IDataListItem> {
 export interface IColumnLayoutProvider<TItem extends IDataListItem> {
   onResizeColumn(columnKey: string, newWidth: number): void;
 
-  renderColumn(column: IColumn<TItem>): JSX.Element;
+  renderColumn(column: IDataListColumn<TItem>): JSX.Element;
 
   // tslint:disable-next-line:member-ordering
   dummy?: TItem;
 }
 
-export interface IDataListListProps<TItem extends IDataListItem> extends IListProps<TItem> {
+export interface IDataListListProps<TItem extends IDataListItem> extends IGenericListProps<TItem> {
   // TODO: CS:
   // tslint:disable-next-line:no-any
   onRenderItem: any;
@@ -51,7 +57,7 @@ export interface IDataListListProps<TItem extends IDataListItem> extends IListPr
 export interface IDataListHeaderProps<TItem extends IDataListItem> {
   className?: string;
 
-  columns: IColumn<TItem>[];
+  columns: IDataListColumn<TItem>[];
 
   rowHeight: number;
 
@@ -61,7 +67,7 @@ export interface IDataListHeaderProps<TItem extends IDataListItem> {
 export interface IDataListRowProps<TItem extends IDataListItem> {
   className?: string;
 
-  columns: IColumn<TItem>[];
+  columns: IDataListColumn<TItem>[];
 
   index: number;
 
@@ -86,7 +92,7 @@ export interface IDataListProps<TItem extends IDataListItem> extends IBaseProps 
 
   items: TItem[];
 
-  columns: IColumn<TItem>[];
+  columns: IDataListColumn<TItem>[];
 
   selectionMode?: SelectionMode;
 
