@@ -3,12 +3,13 @@ import { BaseComponent, css, findScrollableParent, getParent } from '../../Utili
 import { IObjectWithKey } from '../../utilities/selection/index';
 import { IVirtualizedListProps } from './VirtualizedList.Props';
 
-// import * as stylesImport from './VirtualizedList.scss';
-
 const ScrollDebounceDelayDefaultInMs = 50;
 
 interface IRange {
+  /** Start of range */
   start: number;
+
+  /** Exclusive end of range */
   end: number;
 }
 
@@ -151,6 +152,7 @@ export class VirtualizedList<TItem extends IObjectWithKey>
         }
       }
 
+      // TODO: CS: Remove
       console.log('items', range.start, range.end);
 
       for (let i = range.start; i < range.end; ++i) {
@@ -173,14 +175,18 @@ export class VirtualizedList<TItem extends IObjectWithKey>
   }
 
   private _renderSpacerItem(numberOfItems: number, index: number): JSX.Element {
-    const { itemHeight } = this.props;
+    const {
+      itemHeight,
+      spacerItemTagName: ItemTag = 'div'
+    } = this.props;
+
     const height = numberOfItems * itemHeight;
 
     console.log('spacer', numberOfItems, index, height);
 
     (this as any).test += numberOfItems;
 
-    return <div key={ `spacer-item-${index}` } style={ { height } } />;
+    return <ItemTag key={ `spacer-item-${index}` } style={ { height } } />;
   }
 
   private _onScroll(): void {
