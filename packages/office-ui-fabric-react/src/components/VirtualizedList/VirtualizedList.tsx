@@ -21,6 +21,8 @@ export interface IVirtualizedListState {
   viewportHeight: number;
 
   scrollTop: number;
+
+  items: React.ReactNode[];
 }
 
 export class VirtualizedList<TItem extends IObjectWithKey>
@@ -42,7 +44,8 @@ export class VirtualizedList<TItem extends IObjectWithKey>
 
     this.state = {
       viewportHeight: initialViewportHeight,
-      scrollTop: 0
+      scrollTop: 0,
+      items: this._renderItems(0, initialViewportHeight)
     };
 
     if (scrollDebounceDelay > 0) {
@@ -67,8 +70,13 @@ export class VirtualizedList<TItem extends IObjectWithKey>
     this._events.on(this._root, 'focus', this._onFocus, true);
   }
 
+  public componentDidUpdate() {
+    console.log(this._root.getBoundingClientRect().height);
+  }
+
   public render(): JSX.Element {
     const { className } = this.props;
+    const { items } = this.state;
 
     // TODO: Make element overflow auto, works better with how people use the list
     return (
@@ -76,18 +84,19 @@ export class VirtualizedList<TItem extends IObjectWithKey>
         className={ css('ms-VirtualizedList'/*, hasExternalScrollContainer && styles.rootOverflow*/, className) }
         ref={ this._resolveRef('_root') }
       >
-        { this._renderItems() }
+        { items }
       </div>
     );
   }
 
-  private _renderItems(): (JSX.Element | null)[] {
+  private _renderItems(scrollTop: number, viewportHeight: number): (JSX.Element | null)[] {
     const {
       itemHeight,
       items,
       itemOverdraw = 2
     } = this.props;
-    const { scrollTop, viewportHeight } = this.state;
+
+    console.log('Scrolltop', scrollTop);
 
     let ranges: IRange[] = [];
 
@@ -144,7 +153,7 @@ export class VirtualizedList<TItem extends IObjectWithKey>
       if ((isFirstRange && range.start !== 0)
         || (!isFirstRange && lastRenderedIndex !== range.start)) {
         // Last range is not continuous with this one,
-        // or the first range does not start from the beginning insert spacer item
+        // or the first range does not start from the beginning: insert spacer item
         const spacerStartIndex = (isFirstRange ? 0 : lastRenderedIndex);
         const gapBetweenRanges = range.start - spacerStartIndex;
         if (gapBetweenRanges > 0) {
@@ -153,19 +162,19 @@ export class VirtualizedList<TItem extends IObjectWithKey>
       }
 
       // TODO: CS: Remove
-      console.log('items', range.start, range.end);
+      console.log('items', (range.end - range.start), range.start, range.end);
 
       for (let i = range.start; i < range.end; ++i) {
         result.push(onRenderItem(items[i], i));
         (this as any).test++;
       }
 
-      lastRenderedIndex = range.end;
+      lastRenderedIndex = range.end - 1;
     }
 
     // Insert final spacer item
     const itemCount = (items || []).length;
-    if (lastRenderedIndex < itemCount - 1) {
+    if (lastRenderedIndex < itemCount) {
       result.push(this._renderSpacerItem(itemCount - lastRenderedIndex, lastRenderedIndex));
     }
 
@@ -199,8 +208,11 @@ export class VirtualizedList<TItem extends IObjectWithKey>
         scrollTop = (this._scrollContainer as HTMLElement).scrollTop;
       }
 
+      scrollTop = Math.floor(scrollTop);
+
       this.setState({
-        scrollTop
+        scrollTop,
+        items: this._renderItems(scrollTop, this.state.viewportHeight)
       });
     });
   }
