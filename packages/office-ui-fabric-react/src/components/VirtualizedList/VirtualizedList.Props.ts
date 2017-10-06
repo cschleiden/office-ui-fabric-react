@@ -12,8 +12,5 @@ export interface IVirtualizedListProps<TItem extends IObjectWithKey> extends IGe
   /** Number of items to draw before/after viewport height */
   itemOverdraw?: number;
 
-  /** Milliseconds to wait before re-rendering after a scroll event occured, set to 0 to disable debounce */
-  scrollDebounceDelay?: number;
-
   spacerItemTagName?: string;
 }

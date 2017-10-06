@@ -4,6 +4,10 @@ let resources = require('../../scripts/tasks/webpack-resources');
 module.exports = resources.createServeConfig({
   entry: './src/demo/index.tsx',
 
+  devServer: {
+    host: 'cschleid-desk3'
+  },
+
   output: {
     filename: 'demo-app.js'
   },

@@ -7,8 +7,10 @@ import {
 } from '@uifabric/example-app-base';
 import { VirtualizedListBasicExample } from './examples/VirtualizedList.Basic.Example';
 import { FontClassNames } from '../../Styling';
+import { VirtualizedListBasicExample2 } from './examples/VirtualizedList.Basic.Example2';
 
 const VirtualizedListBasicExampleCode = require('!raw-loader!office-ui-fabric-react/src/components/VirtualizedList/examples/VirtualizedList.Basic.Example.tsx') as string;
+const VirtualizedListBasicExample2Code = require('!raw-loader!office-ui-fabric-react/src/components/VirtualizedList/examples/VirtualizedList.Basic.Example2.tsx') as string;
 
 export class VirtualizedListPage extends React.Component<IComponentDemoPageProps, {}> {
   public render() {
@@ -17,9 +19,15 @@ export class VirtualizedListPage extends React.Component<IComponentDemoPageProps
         title='VirtualizedList'
         componentName='VirtualizedListExample'
         exampleCards={
-          <ExampleCard title='VirtualizedList' code={ VirtualizedListBasicExampleCode }>
-            <VirtualizedListBasicExample />
-          </ExampleCard>
+          <div>
+            <ExampleCard title='VirtualizedList' code={ VirtualizedListBasicExampleCode }>
+              <VirtualizedListBasicExample />
+            </ExampleCard>
+
+            <ExampleCard title='VirtualizedList 2' code={ VirtualizedListBasicExample2Code }>
+              <VirtualizedListBasicExample2 />
+            </ExampleCard>
+          </div>
         }
         propertiesTables={
           <PropertiesTableSet

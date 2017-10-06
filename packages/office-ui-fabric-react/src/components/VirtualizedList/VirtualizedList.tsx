@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { BaseComponent, css, findScrollableParent, getParent } from '../../Utilities';
+import { BaseComponent, css, findScrollableParent, getParent, autobind } from '../../Utilities';
 import { IObjectWithKey } from '../../utilities/selection/index';
 import { IVirtualizedListProps } from './VirtualizedList.Props';
-
-const ScrollDebounceDelayDefaultInMs = 50;
+import { IScrollContainerContext, ScrollContainerContextTypes } from '../../utilities/scrolling/ScrollContainer';
 
 interface IRange {
   /** Start of range */
@@ -20,39 +19,33 @@ function isInRange(range: IRange, index: number): boolean {
 export interface IVirtualizedListState {
   viewportHeight: number;
 
-  scrollTop: number;
-
   items: React.ReactNode[];
 }
 
 export class VirtualizedList<TItem extends IObjectWithKey>
   extends BaseComponent<IVirtualizedListProps<TItem>, IVirtualizedListState> {
+  public static contextTypes = ScrollContainerContextTypes;
+
+  public context: IScrollContainerContext;
 
   private _root: HTMLElement;
   private _scrollContainer: HTMLElement | Window;
 
+  private _spacerElements: HTMLElement[] = [];
+
   private _focusedIndex: number = -1;
 
-  // tslint:disable-next-line:no-any
-  constructor(props: IVirtualizedListProps<TItem>, context: any) {
+  constructor(props: IVirtualizedListProps<TItem>, context: IScrollContainerContext) {
     super(props, context);
 
     const {
-      initialViewportHeight = window.innerHeight,  // Start with the window height if not passed in props, this does not cause layout
-      scrollDebounceDelay = ScrollDebounceDelayDefaultInMs
+      initialViewportHeight = window.innerHeight  // Start with the window height if not passed in props, this does not cause layout
     } = this.props;
 
     this.state = {
       viewportHeight: initialViewportHeight,
-      scrollTop: 0,
       items: this._renderItems(0, initialViewportHeight)
     };
-
-    if (scrollDebounceDelay > 0) {
-      this._onScroll = this._async.debounce(this._onScroll, scrollDebounceDelay, {
-        leading: true // We want to execute one iteration immediately after we render
-      });
-    }
   }
 
   public componentDidMount(): void {
@@ -62,16 +55,34 @@ export class VirtualizedList<TItem extends IObjectWithKey>
       throw new Error('Could not find scroll container');
     }
 
-    // TODO: CS: DEBUG
-    console.log('Scroll container', this._scrollContainer);
+    // console.log('Scroll container', this._scrollContainer);
 
-    this._events.on(this._scrollContainer, 'scroll', this._onScroll);
+    // this._events.on(this._scrollContainer, 'scroll', this._onScroll);
 
     this._events.on(this._root, 'focus', this._onFocus, true);
+
+    this.context.scrollContainer.registerVisibleCallback((scrollTop) => {
+      // console.log('intersect');
+      this._render(scrollTop);
+    });
+
+    this.componentDidUpdate();
   }
 
   public componentDidUpdate() {
-    console.log(this._root.getBoundingClientRect().height);
+    // (Re-)register with the observer after every update, this way we'll get an intersection event immediately if one of the spacer
+    // elements is visible right now.
+    for (const ref of this._spacerElements) {
+      this.context.scrollContainer.observe(ref);
+    }
+  }
+
+  public componentWillUpdate() {
+    for (const ref of this._spacerElements) {
+      this.context.scrollContainer.unobserve(ref);
+    }
+
+    // this._spacerElements = [];
   }
 
   public render(): JSX.Element {
@@ -96,7 +107,7 @@ export class VirtualizedList<TItem extends IObjectWithKey>
       itemOverdraw = 2
     } = this.props;
 
-    console.log('Scrolltop', scrollTop);
+    // console.log('Scrolltop', scrollTop);
 
     let ranges: IRange[] = [];
 
@@ -137,7 +148,7 @@ export class VirtualizedList<TItem extends IObjectWithKey>
   }
 
   private _renderRanges(ranges: IRange[]): (JSX.Element | null)[] {
-    (this as any).test = 0;
+    // (this as any).test = 0;
 
     const { items, onRenderItem } = this.props;
     const result: (JSX.Element | null)[] = [];
@@ -161,12 +172,11 @@ export class VirtualizedList<TItem extends IObjectWithKey>
         }
       }
 
-      // TODO: CS: Remove
-      console.log('items', (range.end - range.start), range.start, range.end);
+      // console.log('items', (range.end - range.start), range.start, range.end);
 
       for (let i = range.start; i < range.end; ++i) {
         result.push(onRenderItem(items[i], i));
-        (this as any).test++;
+        // (this as any).test++;
       }
 
       lastRenderedIndex = range.end - 1;
@@ -174,11 +184,11 @@ export class VirtualizedList<TItem extends IObjectWithKey>
 
     // Insert final spacer item
     const itemCount = (items || []).length;
-    if (lastRenderedIndex < itemCount) {
+    if (lastRenderedIndex < itemCount - 1) {
       result.push(this._renderSpacerItem(itemCount - lastRenderedIndex, lastRenderedIndex));
     }
 
-    console.log('------', (this as any).test);
+    // console.log('------', (this as any).test);
 
     return result;
   }
@@ -186,35 +196,57 @@ export class VirtualizedList<TItem extends IObjectWithKey>
   private _renderSpacerItem(numberOfItems: number, index: number): JSX.Element {
     const {
       itemHeight,
+      items = [],
       spacerItemTagName: ItemTag = 'div'
     } = this.props;
 
-    const height = numberOfItems * itemHeight;
+    const spacerHeight = numberOfItems * itemHeight;
+    const itemCount = items.length;
 
-    console.log('spacer', numberOfItems, index, height);
+    // Ideally we would reuse
+    let key: string;
+    if (index === 0) {
+      key = `spacer-start`;
+    } else if (index + numberOfItems === itemCount) {
+      key = `spacer-end`;
+    } else {
+      key = `spacer-item-${index + numberOfItems}`;
+    }
 
-    (this as any).test += numberOfItems;
+    /*
+    else if (index + numberOfItems === itemCount) {
+      key = `spacer-end-${index}`;
+    } else {
+      key = `spacer-item-${index + numberOfItems}`;
+      */
 
-    return <ItemTag key={ `spacer-item-${index}` } style={ { height } } />;
+    return <ItemTag ref={ this._spacerRef } key={ key } style={ { height: spacerHeight } } />;
   }
 
-  private _onScroll(): void {
+  @autobind
+  private _spacerRef(ref: HTMLElement) {
+    if (ref) {
+      // this.context.scrollContainer.observe(ref);
+      this._spacerElements.push(ref);
+    }
+  }
+
+  private _render(scrollTop: number): void {
     // TODO: CS: Can we use intersectionobserver here?
-    this._async.requestAnimationFrame(() => {
-      let scrollTop = 0;
-      if (this._scrollContainer === window) {
-        scrollTop = this._scrollContainer.scrollY;
-      } else {
-        scrollTop = (this._scrollContainer as HTMLElement).scrollTop;
-      }
+    // this._async.requestAnimationFrame(() => {
+    //  let scrollTop = 0;
+    // if (this._scrollContainer === window) {
+    //   scrollTop = this._scrollContainer.scrollY;
+    // } else {
+    //   scrollTop = (this._scrollContainer as HTMLElement).scrollTop;
+    // }
 
-      scrollTop = Math.floor(scrollTop);
+    scrollTop = Math.floor(scrollTop);
 
-      this.setState({
-        scrollTop,
-        items: this._renderItems(scrollTop, this.state.viewportHeight)
-      });
+    this.setState({
+      items: this._renderItems(scrollTop, this.state.viewportHeight)
     });
+    // });
   }
 
   private _onFocus(ev: React.FocusEvent<HTMLDivElement>) {

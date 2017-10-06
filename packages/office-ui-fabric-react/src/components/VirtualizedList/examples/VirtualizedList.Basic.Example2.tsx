@@ -8,10 +8,20 @@ interface IItem {
 
 const items: IItem[] = [];
 
+const Item = (props: { item: IItem }) => {
+  const { item } = props;
+
+  return (
+    <div>
+      { item.key }
+    </div>
+  );
+};
+
 type ExampleList = new () => VirtualizedList<IItem>;
 const ExampleList: ExampleList = VirtualizedList as any;
 
-export class VirtualizedListBasicExample extends React.Component {
+export class VirtualizedListBasicExample2 extends React.Component {
   private _selection: Selection;
 
   constructor() {
@@ -35,8 +45,8 @@ export class VirtualizedListBasicExample extends React.Component {
             items={ items }
             itemHeight={ 30 }
             onRenderItem={ (item, itemIndex) => (
-              <div key={ item.key } style={ { height: 30 } }>
-                { item.key }
+              <div key={ item.key } style={ { height: 30, border: '1px solid blue' } }>
+                <Item item={ item } />
               </div>
             ) }
           />
